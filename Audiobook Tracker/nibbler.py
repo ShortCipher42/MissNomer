@@ -10,7 +10,7 @@ class Nibbler:
     def creator(self):
         createconn = sqlite3.connect(self.file)
         createc = createconn.cursor()
-        createc.execute('''CREATE TABLE shelf (BookID INTEGER PRIMARY KEY autoincrement, Title text, min INT, SeriesID INT, SeriesNum INT, PurchaseYear INT, PurchaseMonth INT, PurchaseDay INT, ReadYear INT, ReadMonth INT, ReadDay INT)''')
+        createc.execute('''CREATE TABLE shelf (BookID INTEGER PRIMARY KEY autoincrement, Title text, min INT, SeriesID INT, SeriesNum INT, PurchaseDate text, ReadDate text)''')
         createc.execute('''CREATE TABLE serieslist (SeriesID INTEGER PRIMARY KEY autoincrement, Name text)''')
         createconn.commit()
         createconn.close()
@@ -22,15 +22,16 @@ class Nibbler:
         newseriesconn.commit()
         newseriesconn.close()
     def newbook(self, info):
+        #date = datetime.date(dateyear,datemonth,dateday).isoformat()
         newbookconn = sqlite3.connect(self.file)
         newbookc = newbookconn.cursor()
-        newbookc.execute('INSERT INTO shelf (Title, min, SeriesID, SeriesNum, PurchaseYear, PurchaseMonth, PurchaseDay) VALUES (?,?,?,?,?,?,?)',(info))
+        newbookc.execute('INSERT INTO shelf (Title, min, SeriesID, SeriesNum, PurchaseDate) VALUES (?,?,?,?,?)',(info))
         newbookconn.commit()
         newbookconn.close()
-    def finishbook(self, name,datemonth,dateday,dateyear):
+    def finishbook(self, name,isodate):
         updateconn = sqlite3.connect(self.file)
         updatec = updateconn.cursor()
-        updatec.execute('update shelf set ReadMonth = ?, ReadDay = ?, ReadYear = ? where Title = ?', (datemonth,dateday,dateyear,name))
+        updatec.execute('update shelf set ReadDate = ? where Title = ? and Datetime(PurchaseDate) =< Datetime(?)', (isodate,name,isodate))
         updateconn.commit()
         updateconn.close()
    
